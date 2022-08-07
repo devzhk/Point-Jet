@@ -16,6 +16,7 @@ sys.path.append('../Utility')
 from Numerics import gradient_first_c2f, gradient_first_f2c, interpolate_f2c, gradient_first
 import NeuralNet
 
+from tqdm.notebook import tqdm
 
 
 #########################################
@@ -84,7 +85,7 @@ def explicit_solve(model, f, dbc, dt = 1.0, Nt = 1000, save_every = 1, L = 1.0):
         if i%save_every == 0:
             q_data[i//save_every, :] = q
             t_data[i//save_every] = i*dt
-            print(i, "max q", np.max(q))
+            # print(i, "max q", np.max(q))
 
     return  yy, t_data, q_data
 
@@ -314,23 +315,21 @@ def generate_data_helper(permeability, f_func, L=1.0, Nx = 100):
     q_c, dq_c = interpolate_f2c(q), gradient_first_f2c(q, dy)
     return xx, f, q, q_c, dq_c 
 
-def generate_data():
+def generate_data(n_data=10, Nx=100, start_idx=1):
     f_funcs = []
-    n_data = 10
 
-    for i in range(1,n_data):
+    for i in range(start_idx,n_data + start_idx):
         def func(xx, A = i):
             return A * xx
         f_funcs.append(func)
 
-
     L = 1.0
-    Nx = 100
     n_data = len(f_funcs)
     xx, f, q, q_c, dq_c = np.zeros((n_data, Nx)), np.zeros((n_data, Nx)), np.zeros((n_data, Nx)), np.zeros((n_data, Nx-1)), np.zeros((n_data, Nx-1))
 
 
-    for i in range(n_data):
+    for i in tqdm(range(n_data)):
+        # print(f'K: {i}')
         xx[i, :], f[i, :], q[i, :], q_c[i, :], dq_c[i, :] = generate_data_helper(permeability_ref, f_funcs[i], L=L, Nx=Nx)
 
         
