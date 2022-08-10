@@ -1,2 +1,4 @@
 Poisson_model/*.pickle
 Poisson_model/*.nn
+Poisson_model/__pycache__
+Utility/__pycache__

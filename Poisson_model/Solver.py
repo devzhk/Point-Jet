@@ -306,7 +306,7 @@ def generate_data_helper(permeability, f_func, L=1.0, Nx = 100):
     dbc = np.array([0.0, 0.0]) 
        
     model = lambda q, yy, res : nummodel(permeability, q, yy, res)
-    xx, t_data, q_data = explicit_solve(model, f, dbc, dt = 5.0e-6, Nt = 500000, save_every = 100000, L = L)
+    xx, t_data, q_data = explicit_solve(model, f, dbc, dt = 5e-7, Nt = 5_000_000, save_every = 1_000_000, L = L)
 
     
     print("Last step increment is : ", np.linalg.norm(q_data[-1, :] - q_data[-2, :]), " last step is : ", np.linalg.norm(q_data[-1, :]))
