@@ -16,7 +16,7 @@ sys.path.append('../Utility')
 from Numerics import gradient_first_c2f, gradient_first_f2c, interpolate_f2c, gradient_first
 import NeuralNet
 
-from tqdm.notebook import tqdm
+from tqdm import tqdm
 
 
 #########################################
