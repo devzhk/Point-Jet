@@ -703,9 +703,6 @@ class FNO1d(nn.Module):
                 else:
                     print("Bad element type in FNO params")
     
-            
-            
-
         
     def get_params(self):
         theta = []
