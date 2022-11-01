@@ -229,7 +229,8 @@ def nummodel(permeability, q, yy, res):
     dy = yy[1] - yy[0]
     dq_c = gradient_first_f2c(q, dy)
     q_c = interpolate_f2c(q)
-    x = np.vstack((q_c, dq_c)).T
+    # x = np.vstack((q_c, dq_c)).T
+    x = q_c[:, np.newaxis]
     mu_c = permeability(x = x)
     res[:] = gradient_first_c2f(mu_c*(dq_c), dy)
 
@@ -240,7 +241,8 @@ def nummodel_flux(flux, q, yy, res):
     dy = yy[1] - yy[0]
     dq_c = gradient_first_f2c(q, dy)
     q_c = interpolate_f2c(q)
-    x = np.vstack((q_c, dq_c)).T
+    # x = np.vstack((q_c, dq_c)).T
+    x = q_c[:, np.newaxis]
     M_c = flux(x = x)
     res[:] = gradient_first_c2f(M_c, dy)
 
@@ -299,18 +301,15 @@ def nummodel_jac(permeability, q, yy, res, V, exact = False, D_permeability = No
 
 
 
-def generate_data_helper(permeability, f_func, dt=5e-7, Nt=5_000_000, L=1.0, Nx = 100):
+def generate_data_helper(permeability, f_func, dt=5e-6, Nt=1_000_000, L=1.0, Nx = 100):
     xx = np.linspace(0.0, L, Nx)
     dy = xx[1] - xx[0]
     f = f_func(xx)   
     dbc = np.array([0.0, 0.0]) 
        
     model = lambda q, yy, res : nummodel(permeability, q, yy, res)
-    xx, t_data, q_data = explicit_solve(model, f, dbc, dt =dt, Nt =Nt, save_every = 1_000_000, L = L)
-
-    
+    xx, t_data, q_data = explicit_solve(model, f, dbc, dt =dt, Nt =Nt, save_every = 50_000, L = L)
     print("Last step increment is : ", np.linalg.norm(q_data[-1, :] - q_data[-2, :]), " last step is : ", np.linalg.norm(q_data[-1, :]))
-    
     q = q_data[-1, :]
     q_c, dq_c = interpolate_f2c(q), gradient_first_f2c(q, dy)
     return xx, f, q, q_c, dq_c
@@ -323,6 +322,12 @@ def generate_data(n_data=10, Nx=100, start_idx=1):
         def func(xx, A = i):
             return A * xx
         f_funcs.append(func)
+
+    for i in range(start_idx, n_data + start_idx):
+        freq = i // 7 + 1
+        phase = i % 11
+        def func(x, a=freq, b=phase):
+            return np.cos(a * x + b)
 
     L = 1.0
     n_data = len(f_funcs)
